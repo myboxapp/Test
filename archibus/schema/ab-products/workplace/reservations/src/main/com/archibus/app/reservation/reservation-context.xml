@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:ehcache="http://www.springmodules.org/schema/ehcache"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:jaxws="http://cxf.apache.org/jaxws" xmlns:jaxrs="http://cxf.apache.org/jaxrs" 
+	xmlns:context="http://www.springframework.org/schema/context" 
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:archibus="http://www.archibus.com/schema/archibus"
+	xmlns:soap="http://cxf.apache.org/bindings/soap"
+	
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd 
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd  
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+	http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd
+	http://cxf.apache.org/bindings/soap http://cxf.apache.org/schemas/configuration/soap.xsd
+	http://www.archibus.com/schema/archibus http://www.archibus.com/schema/archibus/webcentral-namespace.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+	http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd
+    http://www.springmodules.org/schema/ehcache http://www.springmodules.org/schema/cache/springmodules-ehcache.xsd">
+        
+    <context:annotation-config  />
+  
+  	<bean id="arrangeType"
+		class="com.archibus.app.reservation.domain.ArrangeType" 		 
+		scope="prototype">  
+	</bean> 
+    
+  	<bean id="site"
+		class="com.archibus.app.common.space.domain.Site" 		 
+		scope="prototype">  
+	</bean> 
+  
+    <bean id="building"
+		class="com.archibus.app.common.space.domain.Building" 		 
+		scope="prototype">  
+	</bean>  
+	
+	<bean id="floor"
+		class="com.archibus.app.common.space.domain.Floor" 		 
+		scope="prototype">  
+	</bean>   	
+  
+   <bean id="resourceAllocation"
+		class="com.archibus.app.reservation.domain.ResourceAllocation" 		 
+		scope="prototype">  
+	</bean>   
+	
+	<bean id="abstractReservation"
+		class="com.archibus.app.reservation.domain.AbstractReservation" 		 
+		scope="prototype">  
+	</bean> 	
+	
+	<bean id="roomReservation"
+		class="com.archibus.app.reservation.domain.RoomReservation" 		 
+		scope="prototype">  
+	</bean> 	
+	
+	<bean id="resourceReservation"
+        class="com.archibus.app.reservation.domain.ResourceReservation"          
+        scope="prototype">  
+    </bean>      
+	
+	 <bean id="employee"
+		class="com.archibus.app.common.organization.domain.Employee" 		 
+		scope="prototype">  
+	</bean>  
+	
+	<bean id="roomArrangement"
+		class="com.archibus.app.reservation.domain.RoomArrangement" 		 
+		scope="prototype">  
+	</bean> 
+	
+	<bean id="roomAllocation"
+		class="com.archibus.app.reservation.domain.RoomAllocation" 		 
+		scope="prototype">  
+	</bean> 	 
+	
+	<bean id="resourceBean"
+		class="com.archibus.app.reservation.domain.Resource" 		 
+		scope="prototype">  
+	</bean>  
+	 
+	
+	<bean id="visitor"
+		class="com.archibus.app.reservation.domain.Visitor" 		 
+		scope="prototype">  
+	</bean>   
+	
+	<!-- data sources --> 
+	
+	<bean id="employeeDataSource"
+		class="com.archibus.app.common.organization.dao.datasource.EmployeeDataSource" 		 
+		scope="prototype">  
+	</bean> 
+	
+	<bean id="siteDataSource"
+		class="com.archibus.app.common.space.dao.datasource.SiteDataSource" 		 
+		scope="prototype">  
+	</bean> 
+	
+	<bean id="buildingDataSource"
+		class="com.archibus.app.common.space.dao.datasource.BuildingDataSource" 		 
+		scope="prototype">  
+	</bean> 
+	
+	<bean id="floorDataSource"
+		class="com.archibus.app.common.space.dao.datasource.FloorDataSource" 		 
+		scope="prototype">  
+	</bean> 
+	
+	<bean id="roomDataSource"
+		class="com.archibus.app.common.space.dao.datasource.RoomDataSource" 		 
+		scope="prototype">  
+	</bean> 
+	
+	<bean id="arrangeTypeDataSource"
+		class="com.archibus.app.reservation.dao.datasource.ArrangeTypeDataSource" 		 
+		scope="prototype">  
+	</bean> 
+	
+	<bean id="roomArrangementDataSource"
+		class="com.archibus.app.reservation.dao.datasource.RoomArrangementDataSource" 		 
+		scope="prototype">  
+	</bean> 
+	
+	<bean id="resourceDataSource"
+		class="com.archibus.app.reservation.dao.datasource.ResourceDataSource" 		 
+		scope="prototype">  
+	</bean> 
+	
+	<bean id="roomAllocationDataSource"
+		class="com.archibus.app.reservation.dao.datasource.RoomAllocationDataSource" 	
+		p:roomArrangementDataSource-ref="roomArrangementDataSource"	 
+		scope="prototype">  
+	</bean> 
+	
+	<bean id="resourceAllocationDataSource"
+		class="com.archibus.app.reservation.dao.datasource.ResourceAllocationDataSource" 		
+		p:resourceDataSource-ref="resourceDataSource" 
+		scope="prototype">  
+	</bean>
+	
+	<bean id="visitorDataSource"
+		class="com.archibus.app.reservation.dao.datasource.VisitorDataSource"
+		scope="prototype">  
+	</bean>
+	
+	<bean id="roomReservationDataSource"
+		class="com.archibus.app.reservation.dao.datasource.RoomReservationDataSource" 		 
+		scope="prototype" 
+		p:resourceAllocationDataSource-ref="resourceAllocationDataSource" 
+		p:roomAllocationDataSource-ref="roomAllocationDataSource"
+		p:roomArrangementDataSource-ref="roomArrangementDataSource" 
+		p:resourceDataSource-ref="resourceDataSource"
+	/>
+	
+	<bean id="resourceReservationDataSource"
+        class="com.archibus.app.reservation.dao.datasource.ResourceReservationDataSource"        
+        scope="prototype"  
+        p:resourceAllocationDataSource-ref="resourceAllocationDataSource"  
+        p:resourceDataSource-ref="resourceDataSource"
+    />
+	
+	<bean
+        id="notificationMessageBean"
+        class="com.archibus.app.common.notification.domain.NotificationMessage"
+        scope="prototype">
+    </bean>
+    
+    <bean
+        id="notificationMessageDao"
+        class="com.archibus.app.common.notification.dao.datasource.NotificationMessageDataSource"
+        scope="prototype">
+    </bean>
+	
+	<!-- service classes -->	
+	<bean id="reservationEmployeeService" class="com.archibus.app.reservation.service.EmployeeService"		
+		p:employeeDataSource-ref="employeeDataSource"
+		p:spaceService-ref="reservationSpaceService"
+		scope="prototype">  
+	</bean>
+	
+	<bean id="reservationSpaceService" class="com.archibus.app.reservation.service.SpaceService" 		 
+		 p:siteDataSource-ref="siteDataSource"
+		 p:buildingDataSource-ref="buildingDataSource"
+		 p:floorDataSource-ref="floorDataSource"
+		 p:roomDataSource-ref="roomDataSource"
+         p:arrangeTypeDataSource-ref="arrangeTypeDataSource"
+		 scope="prototype">  
+	</bean>   
+	
+	<bean id="reservationWorkRequestService" class="com.archibus.app.reservation.service.WorkRequestService"  
+		scope="prototype" />
+	
+	<bean id="reservationService" class="com.archibus.app.reservation.service.ReservationService"       
+        p:roomArrangementDataSource-ref="roomArrangementDataSource"
+        p:roomReservationDataSource-ref="roomReservationDataSource"     
+        p:workRequestService-ref="reservationWorkRequestService"
+        scope="prototype">  
+    </bean>
+    
+    <bean id="cancelReservationService" class="com.archibus.app.reservation.service.CancelReservationService"        
+        p:roomReservationDataSource-ref="roomReservationDataSource"    
+        p:resourceReservationDataSource-ref="resourceReservationDataSource" 
+        p:workRequestService-ref="reservationWorkRequestService"  
+        scope="prototype">  
+    </bean> 
+	
+	<bean id="reservationMessagesService"
+		class="com.archibus.app.reservation.service.ReservationMessagesService"
+		p:notificationMessageDao-ref="notificationMessageDao"
+		scope="prototype">
+	</bean>
+	 
+</beans>

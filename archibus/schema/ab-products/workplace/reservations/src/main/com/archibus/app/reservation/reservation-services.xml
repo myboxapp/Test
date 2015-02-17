@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ehcache="http://www.springmodules.org/schema/ehcache"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:archibus="http://www.archibus.com/schema/archibus"
+
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd 
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd  	  
+	http://www.archibus.com/schema/archibus http://www.archibus.com/schema/archibus/webcentral-namespace.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+	http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd
+    http://www.springmodules.org/schema/ehcache http://www.springmodules.org/schema/cache/springmodules-ehcache.xsd">
+
+	<import resource="reservation-context.xml" />    
+ 
+ 	<!-- define the room reservation service for the workflow rule services 
+ 		 the calendar service will be defined in the xml file that will include this file.
+  	--> 
+  	
+    <bean id="resourceFinderServiceHelper"
+        class="com.archibus.app.reservation.service.helpers.ResourceFinderServiceHelper" 
+        p:resourceDataSource-ref="resourceDataSource"    
+        scope="prototype">
+    </bean>
+    
+    <bean id="resourceFinderService"
+        class="com.archibus.app.reservation.service.ResourceFinderService" 
+        p:resourceFinderServiceHelper-ref="resourceFinderServiceHelper"    
+        p:roomReservationDataSource-ref="roomReservationDataSource" 
+        p:resourceReservationDataSource-ref="resourceReservationDataSource" 
+        scope="prototype">
+    </bean>
+    
+    <bean id="roomReservationServiceBase"
+        class="com.archibus.app.reservation.service.RoomReservationServiceBase"
+        p:roomReservationDataSource-ref="roomReservationDataSource"
+        p:roomAllocationDataSource-ref="roomAllocationDataSource"
+        p:calendarService-ref="calendarService"
+        scope="prototype">
+    </bean>
+    
+	<bean id="roomReservationService"
+		class="com.archibus.app.reservation.service.RoomReservationService"
+        parent="roomReservationServiceBase"  
+		p:reservationService-ref="reservationService" 
+		p:cancelReservationService-ref="cancelReservationService"
+		scope="prototype">
+	</bean>	 
+	  
+    <bean id="resourceReservationServiceHelper"
+        class="com.archibus.app.reservation.service.helpers.ResourceReservationServiceHelper"   
+        p:resourceReservationDataSource-ref="resourceReservationDataSource" 
+        scope="prototype">
+    </bean>
+     
+    <bean id="resourceReservationService"
+        class="com.archibus.app.reservation.service.ResourceReservationService"     
+        p:resourceReservationDataSource-ref="resourceReservationDataSource"
+        p:cancelReservationService-ref="cancelReservationService"
+        p:workRequestService-ref="reservationWorkRequestService" 
+        p:resourceReservationServiceHelper-ref="resourceReservationServiceHelper"
+        scope="prototype">
+    </bean>
+	
+	<bean id="reservationTimelineServiceHelper"
+        class="com.archibus.app.reservation.service.helpers.TimelineServiceHelper"
+        parent="roomReservationServiceBase"
+        p:roomArrangementDataSource-ref="roomArrangementDataSource"
+        scope="prototype">
+    </bean>
+	
+	<bean id="reservationTimelineService" class="com.archibus.app.reservation.service.TimelineService"
+	    p:roomReservationDataSource-ref="roomReservationDataSource"  
+        p:timelineServiceHelper-ref="reservationTimelineServiceHelper"
+        p:reservationService-ref="reservationService"
+        scope="prototype">
+	</bean>
+	
+	<bean id="resourceTimelineServiceHelper" 
+       class="com.archibus.app.reservation.service.helpers.ResourceTimelineServiceHelper"    
+        p:resourceAllocationDataSource-ref="resourceAllocationDataSource"
+        p:resourceDataSource-ref="resourceDataSource" 
+        scope="prototype">
+    </bean>
+	
+	<bean id="resourceTimelineService" 
+	   class="com.archibus.app.reservation.service.ResourceTimelineService"   
+	    p:resourceTimelineServiceHelper-ref="resourceTimelineServiceHelper"        
+        p:roomReservationDataSource-ref="roomReservationDataSource" 
+        scope="prototype">
+    </bean> 
+    
+    <bean id="approveReservationServiceHelper"
+        class="com.archibus.app.reservation.service.helpers.ApproveReservationServiceHelper"
+        parent="roomReservationServiceBase"       
+        p:resourceAllocationDataSource-ref="resourceAllocationDataSource"
+        p:workRequestService-ref="reservationWorkRequestService" 
+        scope="prototype">
+    </bean> 
+	
+	<bean id="approveReservationService"
+		class="com.archibus.app.reservation.service.ApproveReservationService" 		 
+		p:approveReservationServiceHelper-ref="approveReservationServiceHelper"
+		scope="prototype">
+	</bean>
+	
+	<!-- Separate bean definition of ApproveReservationService for the Scheduled WFR 
+		AbWorkplaceReservations-checkRoomAndResourcesApproval -->
+	<bean id="checkRoomAndResourcesApproval"
+		class="com.archibus.app.reservation.service.ApproveReservationService" 		 
+		p:approveReservationServiceHelper-ref="approveReservationServiceHelper"
+		scope="prototype">
+	</bean>
+
+	<bean id="reservationRecurrenceService"
+		class="com.archibus.app.reservation.service.RecurrenceService" 
+		p:roomReservationDataSource-ref="roomReservationDataSource" 
+		scope="prototype">
+	</bean>     
+      
+    
+</beans>
+	

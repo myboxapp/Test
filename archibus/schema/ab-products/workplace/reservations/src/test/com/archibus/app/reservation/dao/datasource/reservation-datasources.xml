@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:p="http://www.springframework.org/schema/p" 
+	xmlns:context="http://www.springframework.org/schema/context"  
+	xmlns:archibus="http://www.archibus.com/schema/archibus" 
+	
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd 
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd  
+	  
+	http://www.archibus.com/schema/archibus http://www.archibus.com/schema/archibus/webcentral-namespace.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+	<!-- test with no integration -->
+	<import resource="classpath:com/archibus/app/reservation/no-integration-context.xml" /> 
+  
+	<bean id="roomReservationDataSourceTest"
+		class="com.archibus.app.reservation.dao.datasource.RoomReservationDataSourceTest"		
+		p:roomReservationDataSource-ref="roomReservationDataSource"		 		 
+		scope="prototype" > 
+	</bean>
+	 
+	<bean id="visitorDataSourceTest" class="com.archibus.app.reservation.dao.datasource.VisitorDataSourceTest"
+		p:visitorDataSource-ref="visitorDataSource"
+		scope="prototype" 
+	/> 	  
+
+</beans>

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:p="http://www.springframework.org/schema/p" 
+	xmlns:context="http://www.springframework.org/schema/context"  
+	xmlns:archibus="http://www.archibus.com/schema/archibus"
+	
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd 
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd  	 
+	http://www.archibus.com/schema/archibus http://www.archibus.com/schema/archibus/webcentral-namespace.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd"> 
+ 	
+ 	<!-- some setting to enable the exchange integration to work -->
+ 	<import resource="classpath:META-INF/cxf/cxf.xml" />
+    <import resource="classpath:META-INF/cxf/cxf-extension-soap.xml" />
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+    
+    <bean id="propertyConfigurerApplications"
+        class="com.archibus.utility.LoggingPropertyPlaceholderConfigurer"
+        p:placeholderPrefix="$Applications{">
+        <property name="locations">
+            <list> 
+                <value>
+                    classpath:context/applications/reservations.properties
+                </value>
+            </list>
+        </property>
+    </bean>
+     
+    <!--  test with exchange integration --> 
+    <import resource="classpath:com/archibus/app/reservation/exchange-integration-context.xml" />
+    
+	<bean id="reservationSpaceServiceTest" class="com.archibus.app.reservation.service.SpaceServiceTest" 	 
+		p:spaceService-ref="reservationSpaceService" 
+		scope="prototype">  
+	</bean> 		
+	
+	<bean id="reservationEmployeeServiceTest" class="com.archibus.app.reservation.service.EmployeeServiceTest" 	 
+		p:employeeService-ref="reservationEmployeeService"
+		scope="prototype">  
+	</bean> 	  
+	
+	<bean id="reservationServiceTest" class="com.archibus.app.reservation.service.ReservationServiceTest" 	 
+		p:reservationService-ref="reservationService"
+	    p:cancelReservationService-ref="cancelReservationService"
+		scope="prototype">  
+	</bean>
+    
+    <!-- Define the remote bean without proxy for testing. -->
+    <bean id="reservationRemoteServiceImpl" class="com.archibus.app.reservation.service.ReservationRemoteServiceImpl"
+        p:employeeService-ref="reservationEmployeeService"
+        p:reservationService-ref="reservationService"
+        p:spaceService-ref="reservationSpaceService"
+        p:calendarSettings-ref="calendarServiceHelper"
+        p:cancelReservationService-ref="cancelReservationService"
+        scope="prototype">
+    </bean>
+	
+	<bean id="reservationRemoteTest" class="com.archibus.app.reservation.service.ReservationRemoteTest" 	 
+		p:reservationRemoteServiceImpl-ref="reservationRemoteServiceImpl"
+		p:roomReservationDataSource-ref="roomReservationDataSource"
+		scope="prototype">  
+	</bean>  
+	
+	<bean id="exchangeCalendarServiceTest" class="com.archibus.app.reservation.exchange.service.ExchangeCalendarServiceTest" 	 
+		p:calendarService-ref="calendarService"
+		p:serviceHelper-ref="calendarServiceHelper"
+        p:appointmentHelper-ref="appointmentHelper"
+		p:appointmentPropertiesHelper-ref="appointmentPropertiesHelper"
+		scope="prototype">  
+	</bean>
+	
+	<bean id="roomReservationServiceTest" class="com.archibus.app.reservation.service.RoomReservationServiceTest"
+		p:roomReservationService="roomReservationService"
+		p:roomReservationDataSource-ref="roomReservationDataSource"
+		p:roomAllocationDataSource-ref="roomAllocationDataSource"
+		p:resourceAllocationDataSource-ref="resourceAllocationDataSource"
+		p:serviceHelper-ref="calendarServiceHelper"
+        p:appointmentHelper-ref="appointmentHelper"
+        p:reservationService-ref="reservationService"
+		scope="prototype">
+	</bean>
+	
+	<bean id="exchangeListenerTest"
+		class="com.archibus.app.reservation.exchange.service.ExchangeListenerTest"
+		p:exchangeListenerService-ref="exchangeListener"
+		p:roomReservationService="roomReservationService"
+		p:roomReservationDataSource-ref="roomReservationDataSource"
+		p:roomAllocationDataSource-ref="roomAllocationDataSource"
+		p:serviceHelper-ref="calendarServiceHelper"
+        p:appointmentHelper-ref="appointmentHelper"
+        p:calendarService-ref="calendarService"
+		scope="prototype">
+	</bean>
+	
+	<bean id="approveReservationServiceTest" class="com.archibus.app.reservation.service.ApproveReservationServiceTest" 	 
+		p:reservationService-ref="reservationService"
+		p:appointmentHelper-ref="appointmentHelper"
+		p:roomReservationService="roomReservationService"
+		p:roomReservationDataSource-ref="roomReservationDataSource"
+		p:roomAllocationDataSource-ref="roomAllocationDataSource"
+		p:roomArrangementDataSource-ref="roomArrangementDataSource"
+		p:resourceAllocationDataSource-ref="resourceAllocationDataSource"
+		p:resourceDataSource-ref="resourceDataSource"
+		p:resourceReservationDataSource-ref="resourceReservationDataSource"
+		scope="prototype">  
+	</bean> 
+	
+	<bean id="webCentralCalendarServiceTest" class="com.archibus.app.reservation.service.WebCentralCalendarServiceTest" 	 
+		p:webCentralCalendarService-ref="webCentralCalendarService"
+		scope="prototype">
+	</bean>
+	
+	<bean id="resourceFinderServiceTest" class="com.archibus.app.reservation.service.ResourceFinderServiceTest"    
+        p:resourceReservationService-ref="resourceFinderService" 
+        scope="prototype">
+    </bean>
+	
+	<bean id="resourceReservationServiceTest" class="com.archibus.app.reservation.service.ResourceReservationServiceTest" 	 
+		p:resourceReservationService-ref="resourceReservationService"  
+		p:resourceAllocationDataSource-ref="resourceAllocationDataSource"
+		p:resourceReservationDataSource-ref="resourceReservationDataSource"
+		scope="prototype">
+	</bean>
+	
+	<bean id="reservationTimelineServiceTest" class="com.archibus.app.reservation.service.TimelineServiceTest"    
+        p:resourceReservationService-ref="resourceReservationService"
+        p:resourceDataSource-ref="resourceDataSource"
+        p:appointmentHelper-ref="appointmentHelper"
+        p:timelineService-ref="reservationTimelineService"
+        p:recurrenceService-ref="reservationRecurrenceService"
+        p:roomReservationDataSource-ref="roomReservationDataSource"
+        p:roomAllocationDataSource-ref="roomAllocationDataSource" 
+        scope="prototype">
+    </bean>
+	
+    <bean id="resourceTimelineServiceTest" class="com.archibus.app.reservation.service.ResourceTimelineServiceTest"    
+        p:resourceReservationService-ref="resourceReservationService"
+        p:resourceDataSource-ref="resourceDataSource"
+        p:resourceTimelineService-ref="resourceTimelineService"
+        scope="prototype">
+    </bean>
+    
+    <bean id="reservationUpgradeServiceTest" class="com.archibus.app.reservation.service.ReservationUpgradeServiceTest"
+    	p:resourceDataSource-ref="resourceDataSource"
+    	scope="prototype">
+   	</bean>
+
+</beans>

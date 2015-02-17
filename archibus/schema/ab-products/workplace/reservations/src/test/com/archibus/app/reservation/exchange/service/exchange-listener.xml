@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:p="http://www.springframework.org/schema/p" 
+	xmlns:context="http://www.springframework.org/schema/context"  
+	xmlns:archibus="http://www.archibus.com/schema/archibus"
+	
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd 
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd  	 
+	http://www.archibus.com/schema/archibus http://www.archibus.com/schema/archibus/webcentral-namespace.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+     
+    <!-- some setting to enable the exchange integration to work -->
+    <import resource="classpath:META-INF/cxf/cxf.xml" />
+    <import resource="classpath:META-INF/cxf/cxf-extension-soap.xml" />
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+    
+    <bean id="propertyConfigurerApplications"
+        class="com.archibus.utility.LoggingPropertyPlaceholderConfigurer"
+        p:placeholderPrefix="$Applications{">
+        <property name="locations">
+            <list> 
+                <value>
+                    classpath:context/applications/reservations.properties
+                </value>
+            </list>
+        </property>
+    </bean>
+     
+    <!-- Test with exchange integration, specific for testing ExchangeListener without proxies. --> 
+    <import resource="classpath:com/archibus/app/reservation/reservation-services.xml" />
+	<import resource="classpath:com/archibus/app/reservation/reservation-webservices.xml" />
+    
+    <bean id="exchangeDayOfTheWeekConverter" class="com.archibus.app.reservation.exchange.util.ExchangeDayOfTheWeekConverter"
+        scope="prototype">
+    </bean>
+    
+    <bean id="exchangeRecurrenceConverter" class="com.archibus.app.reservation.exchange.util.ExchangeRecurrenceConverter"
+        p:dayOfTheWeekConverter-ref="exchangeDayOfTheWeekConverter"
+        scope="prototype">
+    </bean>
+
+	<bean id="calendarServiceHelper"
+		class="com.archibus.app.reservation.exchange.service.ExchangeServiceHelper"
+		p:domain="$Applications{exchange.domain}" p:userName="$Applications{exchange.userName}" 
+		p:password="$Applications{exchange.password}" p:proxyPort="$Applications{exchange.proxyPort}" 
+		p:url="$Applications{exchange.url}" p:resourceAccount="$Applications{exchange.resourceAccount}"
+		scope="prototype">
+	</bean>
+	
+	<bean id="timeZoneMapper" class="com.archibus.app.reservation.exchange.util.AppointmentTimeZoneMapper"
+		scope="singleton">
+	</bean>
+	
+	<bean id="appointmentPropertiesHelper" class="com.archibus.app.reservation.exchange.util.AppointmentPropertiesHelper"
+		scope="singleton">
+	</bean>
+    
+    <bean id="appointmentHelper" class="com.archibus.app.reservation.exchange.service.AppointmentHelper"
+		p:serviceHelper-ref="calendarServiceHelper"
+        p:timeZoneMapper-ref="timeZoneMapper"
+        p:appointmentPropertiesHelper-ref="appointmentPropertiesHelper"
+        p:recurrenceConverter-ref="exchangeRecurrenceConverter"
+        scope="prototype">
+    </bean>
+    
+    <bean id="exchangeMessagesService"
+        class="com.archibus.app.reservation.exchange.service.ExchangeMessagesService"
+        p:notificationMessageDao-ref="notificationMessageDao"
+        scope="prototype">
+    </bean>
+
+	<bean id="calendarService"
+		class="com.archibus.app.reservation.exchange.service.ExchangeCalendarService"
+		p:appointmentHelper-ref="appointmentHelper"
+		p:exchangeMessagesService-ref="exchangeMessagesService"
+		scope="prototype">
+	</bean>
+    
+    <bean id="meetingItemHandler"
+        class="com.archibus.app.reservation.exchange.service.MeetingItemHandler"
+        p:appointmentHelper-ref="appointmentHelper"
+        p:reservationService-ref="reservationService"
+        p:messagesService-ref="exchangeMessagesService"
+        scope="prototype">
+    </bean>
+    
+    <bean id="meetingCancellationHandler"
+        class="com.archibus.app.reservation.exchange.service.MeetingCancellationHandler"
+        parent="meetingItemHandler"
+        p:cancelReservationService-ref="cancelReservationService"
+        scope="prototype">
+    </bean>
+    
+    <bean id="meetingRequestHandler"
+        class="com.archibus.app.reservation.exchange.service.MeetingRequestHandler"
+        parent="meetingItemHandler"
+        scope="prototype">
+    </bean>
+		
+	<bean id="itemHandler"      
+		class="com.archibus.app.reservation.exchange.service.ItemHandlerImpl"
+		p:meetingRequestHandler-ref="meetingRequestHandler"
+        p:meetingCancellationHandler-ref="meetingCancellationHandler"
+		scope="prototype">
+    </bean>
+    
+    <bean id="exchangeListener"
+		class="com.archibus.app.reservation.exchange.service.ExchangeListener" 
+		p:enableListener="false"
+		p:itemHandler-ref="itemHandler"
+		p:serviceHelper-ref="calendarServiceHelper">
+	</bean>
+
+	<bean id="exchangeListenerTest"
+		class="com.archibus.app.reservation.exchange.service.ExchangeListenerTest"
+		p:exchangeListener-ref="exchangeListener"
+		p:roomReservationService-ref="roomReservationService"
+		p:roomReservationDataSource-ref="roomReservationDataSource"
+		p:roomAllocationDataSource-ref="roomAllocationDataSource"
+		p:serviceHelper-ref="calendarServiceHelper"
+        p:appointmentHelper-ref="appointmentHelper"
+        p:calendarService-ref="calendarService"
+		scope="prototype">
+	</bean>
+
+</beans>

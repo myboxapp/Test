@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+    xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:security="http://www.springframework.org/schema/security"
+    xmlns:archibus="http://www.archibus.com/schema/archibus"
+    xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xmlns:soap="http://cxf.apache.org/bindings/soap"
+    xsi:schemaLocation="http://www.archibus.com/schema/archibus http://www.archibus.com/schema/archibus/webcentral-namespace.xsd
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+	http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+    http://cxf.apache.org/bindings/soap http://cxf.apache.org/schemas/configuration/soap.xsd">
+
+    <!-- WebServices for Reservations -->
+
+    <!-- define recurrence classes that are invisible to the interface -->
+	<bean id="aegisReservationDatabinding" class="com.archibus.service.remoting.cxf.AegisMtomDatabinding"
+		scope="prototype">
+		<property name="aegisContext">
+			<bean class="org.apache.cxf.aegis.AegisContext">
+				<property name="writeXsiTypes" value="true" />
+				<property name="rootClassNames">
+					<set>
+						<value>com.archibus.app.reservation.domain.recurrence.DailyPattern</value>
+						<value>com.archibus.app.reservation.domain.recurrence.WeeklyPattern</value>
+						<value>com.archibus.app.reservation.domain.recurrence.MonthlyPattern</value>
+						<value>com.archibus.app.reservation.domain.recurrence.YearlyPattern</value>
+					</set>
+				</property>
+			</bean>
+		</property>
+	</bean>	
+	
+	<!-- remote service is no prototype -->
+	<bean
+        id="reservationService-remote"
+        class="org.springframework.aop.framework.ProxyFactoryBean"
+		p:proxyInterfaces="com.archibus.app.reservation.service.ReservationRemoteService">
+		<property name="target">
+			<bean
+                class="com.archibus.app.reservation.service.ReservationRemoteServiceImpl" 
+                p:employeeService-ref="reservationEmployeeService"
+                p:reservationService-ref="reservationService"
+                p:spaceService-ref="reservationSpaceService"
+                p:calendarSettings-ref="calendarServiceHelper" 
+                p:cancelReservationService-ref="cancelReservationService">
+            </bean> 
+		</property>
+		<property name="interceptorNames">
+			<list>   
+                <value>securityInterceptor</value>
+				<value>contextInterceptor</value>
+				<value>transactionInterceptor.data</value>
+                <value>exceptionHandlingInterceptor</value>
+                <!-- TODO remove duplicate calls DataSourceContextTemplate.prepareDataSourceContext(dataSource) ? -->
+				<value>eventHandlerContextInterceptor</value>
+			</list>
+		</property> 
+	</bean>
+ 
+	<jaxws:endpoint 
+        id="reservationService-ws"
+        implementor="#reservationService-remote"
+        address="/reservation">
+       
+        <jaxws:dataBinding>
+            <ref bean="aegisReservationDatabinding"/>
+        </jaxws:dataBinding>    
+	</jaxws:endpoint> 
+ 
+</beans>
